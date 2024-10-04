@@ -38,6 +38,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.unitconvertor.ui.theme.UnitConvertorTheme
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -60,14 +61,19 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun UnitConverter() {
     var inputValue by remember { mutableStateOf("") }
-    var outputValue by remember { mutableStateOf("") }
-    var inputUnit by remember { mutableStateOf("Centimeters") }
+    var outputValue by remember { mutableStateOf("0.0") }
+    var inputUnit by remember { mutableStateOf("Meters") }
     var outputUnit by remember { mutableStateOf("Meters") }
     var iExpanded by remember { mutableStateOf(false) }
     var oExpanded by remember { mutableStateOf(false) }
-    var convertor by remember { mutableStateOf(0.01) }
+    var convertor = remember { mutableStateOf(1.0) }
+    var oConvertor = remember { mutableStateOf(1.0) }
+    fun convertUnits() {
+        val inputValueAsADouble = inputValue.toDoubleOrNull()?: 0.0
+        val result = (inputValueAsADouble * convertor.value *100.0 / oConvertor.value ).roundToInt() / 100.0
+        outputValue = result.toString()
 
-
+    }
 
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = CenterHorizontally) {
         Text("Unit Converter")
@@ -76,6 +82,7 @@ fun UnitConverter() {
 
         OutlinedTextField(value = inputValue, onValueChange = {
             inputValue = it
+            convertUnits()
         }, label = { Text("Input Value") }, placeholder = { Text("Ex: 10") })
 
         Text("$inputUnit \t\t\tto \t\t\t\t $outputUnit", fontSize = 20.sp)
@@ -86,7 +93,7 @@ fun UnitConverter() {
                 Button(onClick = {
                     iExpanded = !iExpanded
                 }) {
-                    Text("Select")
+                    Text(inputUnit)
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "Arrow Drop Down")
                 }
                 DropdownMenu(expanded = iExpanded, onDismissRequest = {
@@ -97,7 +104,8 @@ fun UnitConverter() {
                         onClick = {
                             iExpanded = !iExpanded
                             inputUnit = "Centimeters"
-                            convertor = 0.01
+                            convertor.value = 0.01
+                            convertUnits()
                         }
                     )
                     DropdownMenuItem(
@@ -105,25 +113,35 @@ fun UnitConverter() {
                         onClick = {
                             iExpanded = !iExpanded
                             inputUnit = "Meters"
-                            convertor = 1.0
+                            convertor.value = 1.0
+                            convertUnits()
                         }
                     )
                     DropdownMenuItem(
                         text = { Text("Kilometers") },
                         onClick = {
-                            /**/
+                            iExpanded = !iExpanded
+                            inputUnit = "Kilometers"
+                            convertor.value = 100.0
+                            convertUnits()
                         }
                     )
                     DropdownMenuItem(
                         text = { Text("Feet") },
                         onClick = {
-                            /**/
+                            iExpanded = !iExpanded
+                            inputUnit = "Feet"
+                            convertor.value = 0.3048
+                            convertUnits()
                         }
                     )
                     DropdownMenuItem(
                         text = { Text("Inches") },
                         onClick = {
-                            /**/
+                            iExpanded = !iExpanded
+                            inputUnit = "Inches"
+                            convertor.value = 0.0254
+                            convertUnits()
                         }
                     )
 
@@ -132,7 +150,7 @@ fun UnitConverter() {
             Box {
                 Button(onClick = {
                     oExpanded = !oExpanded}) {
-                    Text("Select")
+                    Text(outputUnit)
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "Arrow Drop Down")
                 }
                 DropdownMenu(expanded = oExpanded, onDismissRequest = {
@@ -143,31 +161,44 @@ fun UnitConverter() {
                         onClick = {
                             oExpanded = !oExpanded
                             outputUnit = "Centimeters"
-                            convertor = 0.01
+                            oConvertor.value = 0.01
+                            convertUnits()
                         }
                     )
                     DropdownMenuItem(
                         text = { Text("Meters") },
                         onClick = {
-                            /**/
+                            oExpanded = !oExpanded
+                            outputUnit = "Meters"
+                            oConvertor.value = 1.0
+                            convertUnits()
                         }
                     )
                     DropdownMenuItem(
                         text = { Text("Kilometers") },
                         onClick = {
-                            /**/
+                            oExpanded = !oExpanded
+                            outputUnit = "Kilometers"
+                            oConvertor.value = 100.0
+                            convertUnits()
                         }
                     )
                     DropdownMenuItem(
                         text = { Text("Feet") },
                         onClick = {
-                            /**/
+                            oExpanded = !oExpanded
+                            outputUnit = "Feet"
+                            oConvertor.value = 0.3048
+                            convertUnits()
                         }
                     )
                     DropdownMenuItem(
                         text = { Text("Inches") },
                         onClick = {
-                            /**/
+                            oExpanded = !oExpanded
+                            outputUnit = "Inches"
+                            oConvertor.value = 0.0254
+                            convertUnits()
                         }
                     )
 
@@ -175,21 +206,11 @@ fun UnitConverter() {
             }
             }
         Row {
-            Text("Result:")
+            Text("Result ≈ ${outputValue} $outputUnit", fontSize = 20.sp)
         }
         }
 
     }
-
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
 @Preview(showBackground =true, showSystemUi = true)
 @Composable
 fun unitConverterPreview(){
