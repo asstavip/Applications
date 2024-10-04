@@ -1,12 +1,16 @@
 package com.example.unitconvertor
 
 import android.animation.TypeConverter
+import android.content.Context
+import android.content.SharedPreferences
+import androidx.compose.runtime.mutableStateListOf
 import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,11 +25,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -34,11 +40,24 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.unitconvertor.ui.theme.UnitConvertorTheme
 import kotlin.math.roundToInt
+
+/*
+TODO 1: add history section to the app
+
+ */
+
+
+
+
+
+
+
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -58,6 +77,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("RememberReturnType")
 @Composable
 fun UnitConverter() {
     var inputValue by remember { mutableStateOf("") }
@@ -68,21 +88,62 @@ fun UnitConverter() {
     var oExpanded by remember { mutableStateOf(false) }
     var convertor = remember { mutableStateOf(1.0) }
     var oConvertor = remember { mutableStateOf(1.0) }
+    val conversionHistory = remember { mutableStateListOf<String>() }
+
     fun convertUnits() {
         val inputValueAsADouble = inputValue.toDoubleOrNull()?: 0.0
         val result = (inputValueAsADouble * convertor.value *100.0 / oConvertor.value ).roundToInt() / 100.0
         outputValue = result.toString()
 
     }
+    fun addToHistory(input: String, result: String, inputUnit: String, outputUnit: String) {
+        if (conversionHistory.size >= 5) {
+            conversionHistory.removeAt(0) // Keep only last 5 conversions
+        }
+        conversionHistory.add("$input $inputUnit to $result $outputUnit")
+    }
+
+    val context = LocalContext.current
+
+    fun saveHistoryToPreferences(context: Context, conversionHistory: List<String>) {
+        val sharedPref = context.getSharedPreferences("conversion_history", Context.MODE_PRIVATE)
+        val editor = sharedPref.edit()
+
+        // Join history items with a delimiter (e.g., "|") to save as a single string
+        val historyString = conversionHistory.joinToString("|")
+        editor.putString("history", historyString)
+        editor.apply()
+    }
+
+    // Function to load conversion history from SharedPreferences
+    fun loadHistoryFromPreferences(context: Context): MutableList<String> {
+        val sharedPref = context.getSharedPreferences("conversion_history", Context.MODE_PRIVATE)
+        val historyString = sharedPref.getString("history", "")
+
+        // Convert the saved string back to a list of history items
+        return if (historyString.isNullOrEmpty()) mutableStateListOf() else historyString.split("|").toMutableList()
+    }
+
+
 
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = CenterHorizontally) {
-        Text("Unit Converter")
+        Text("Unit Converter", fontSize = 34.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp)
+        )
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(40.dp))
+        Column {
+            Text("Conversion History", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            conversionHistory.forEach { historyItem ->
+                Text(historyItem)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(40.dp))
 
         OutlinedTextField(value = inputValue, onValueChange = {
             inputValue = it
-            convertUnits()
         }, label = { Text("Input Value") }, placeholder = { Text("Ex: 10") })
 
         Text("$inputUnit \t\t\tto \t\t\t\t $outputUnit", fontSize = 20.sp)
@@ -96,7 +157,7 @@ fun UnitConverter() {
                     Text(inputUnit)
                     Icon(Icons.Default.ArrowDropDown, contentDescription = "Arrow Drop Down")
                 }
-                DropdownMenu(expanded = iExpanded, onDismissRequest = {
+                DropdownMenu(modifier = Modifier.animateContentSize(),expanded = iExpanded, onDismissRequest = {
                     iExpanded = !iExpanded
                 }) {
                     DropdownMenuItem(
@@ -105,7 +166,7 @@ fun UnitConverter() {
                             iExpanded = !iExpanded
                             inputUnit = "Centimeters"
                             convertor.value = 0.01
-                            convertUnits()
+
                         }
                     )
                     DropdownMenuItem(
@@ -114,7 +175,7 @@ fun UnitConverter() {
                             iExpanded = !iExpanded
                             inputUnit = "Meters"
                             convertor.value = 1.0
-                            convertUnits()
+
                         }
                     )
                     DropdownMenuItem(
@@ -123,7 +184,7 @@ fun UnitConverter() {
                             iExpanded = !iExpanded
                             inputUnit = "Kilometers"
                             convertor.value = 100.0
-                            convertUnits()
+
                         }
                     )
                     DropdownMenuItem(
@@ -132,7 +193,7 @@ fun UnitConverter() {
                             iExpanded = !iExpanded
                             inputUnit = "Feet"
                             convertor.value = 0.3048
-                            convertUnits()
+
                         }
                     )
                     DropdownMenuItem(
@@ -141,7 +202,7 @@ fun UnitConverter() {
                             iExpanded = !iExpanded
                             inputUnit = "Inches"
                             convertor.value = 0.0254
-                            convertUnits()
+
                         }
                     )
 
@@ -162,7 +223,7 @@ fun UnitConverter() {
                             oExpanded = !oExpanded
                             outputUnit = "Centimeters"
                             oConvertor.value = 0.01
-                            convertUnits()
+
                         }
                     )
                     DropdownMenuItem(
@@ -171,7 +232,7 @@ fun UnitConverter() {
                             oExpanded = !oExpanded
                             outputUnit = "Meters"
                             oConvertor.value = 1.0
-                            convertUnits()
+
                         }
                     )
                     DropdownMenuItem(
@@ -180,7 +241,7 @@ fun UnitConverter() {
                             oExpanded = !oExpanded
                             outputUnit = "Kilometers"
                             oConvertor.value = 100.0
-                            convertUnits()
+
                         }
                     )
                     DropdownMenuItem(
@@ -189,7 +250,7 @@ fun UnitConverter() {
                             oExpanded = !oExpanded
                             outputUnit = "Feet"
                             oConvertor.value = 0.3048
-                            convertUnits()
+
                         }
                     )
                     DropdownMenuItem(
@@ -198,13 +259,21 @@ fun UnitConverter() {
                             oExpanded = !oExpanded
                             outputUnit = "Inches"
                             oConvertor.value = 0.0254
-                            convertUnits()
+
                         }
                     )
 
                 }
             }
             }
+        Row(modifier = Modifier.padding(10.dp), horizontalArrangement = Arrangement.spacedBy(50.dp)) {
+            Button(onClick = {
+                convertUnits()
+                addToHistory(inputValue, outputValue, inputUnit, outputUnit)
+            Toast.makeText(context, "Conversion Successful!", Toast.LENGTH_SHORT).show()
+        }) {
+            Text("Convert")
+        } }
         Row {
             Text("Result ≈ ${outputValue} $outputUnit", fontSize = 20.sp)
         }
