@@ -5,12 +5,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.runtime.mutableStateListOf
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,9 +21,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -39,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,7 +54,7 @@ import com.example.unitconvertor.ui.theme.UnitConvertorTheme
 import kotlin.math.roundToInt
 
 /*
-TODO 1: add history section to the app
+TODO 1: remove the user bad request
 
  */
 
@@ -273,9 +279,24 @@ fun UnitConverter() {
             Toast.makeText(context, "Conversion Successful!", Toast.LENGTH_SHORT).show()
         }) {
             Text("Convert")
-        } }
-        Row {
+        }
+        }
+        Row (modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(50.dp)) {
             Text("Result ≈ ${outputValue} $outputUnit", fontSize = 20.sp)
+            Button(
+                onClick = {
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, "Conversion result:from $inputValue $inputUnit to $outputValue $outputUnit ")
+                    }
+                    context.startActivity(Intent.createChooser(shareIntent, "Share result via"))
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Gray
+                )
+            ) {
+                Icon(imageVector = Icons.Filled.Share, contentDescription = "Share")
+            }
         }
         }
 
