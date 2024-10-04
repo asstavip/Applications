@@ -1,5 +1,14 @@
 package com.example.unitconvertor
 
+
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.*
+import androidx.compose.ui.graphics.Brush
 import android.animation.TypeConverter
 import android.content.Context
 import android.content.SharedPreferences
@@ -13,6 +22,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,22 +72,52 @@ import kotlin.math.roundToInt
 
 
 class MainActivity : ComponentActivity() {
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
             UnitConvertorTheme {
                 Scaffold(
-                    modifier = Modifier.fillMaxSize())
-                {
-                    UnitConverter(
-                    )
+                    topBar = {
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    "Unit Converter",
+                                    color = Color.White,
+                                    modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.Center),
+                                    fontSize = 34.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            },
+                            colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = Color.Black)
+                        )
+                    }
+                ) { paddingValues ->
+                    // Determine gradient colors based on the system theme
+                    val gradientColors = if (isSystemInDarkTheme()) {
+                        listOf(Color.Black, Color(0xFF800080)) // Dark mode colors (black to purple)
+                    } else {
+                        listOf(Color(0xFFe66465), Color(0xFF9198e5)) // Light mode colors (gray to light purple)
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.linearGradient(
+                                    colors = gradientColors
+                                )
+                            )
+                            .padding(paddingValues)
+                    ) {
+                        UnitConverter() // Your UnitConverter content
+                    }
                 }
             }
         }
     }
 }
+
 
 @SuppressLint("RememberReturnType")
 @Composable
@@ -131,10 +171,6 @@ fun UnitConverter() {
 
 
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = CenterHorizontally) {
-        Text("Unit Converter", fontSize = 34.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(16.dp)
-        )
 
         Spacer(modifier = Modifier.height(40.dp))
         Column {
@@ -310,8 +346,39 @@ fun UnitConverter() {
         }
 
     }
-@Preview(showBackground =true, showSystemUi = true)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun unitConverterPreview(){
-    UnitConverter()
+fun PreviewUnitConverterApp() {
+    UnitConvertorTheme {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Unit Converter") },
+                    colors = TopAppBarDefaults.mediumTopAppBarColors(containerColor = Color.Black)
+                )
+            }
+        ) { paddingValues ->
+            // Determine gradient colors based on the system theme
+            val gradientColors = if (isSystemInDarkTheme()) {
+                listOf(Color.Black, Color(0xFF800080)) // Dark mode colors (black to purple)
+            } else {
+                listOf(Color(0xFFe0e0e0), Color(0xFFd1c4e9)) // Light mode colors (gray to light purple)
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.linearGradient(
+                            colors = gradientColors
+                        )
+                    )
+                    .padding(paddingValues)
+            ) {
+                UnitConverter() // Your UnitConverter content
+            }
+        }
+    }
 }
