@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Share
@@ -47,6 +48,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -95,6 +98,8 @@ fun UnitConverter() {
     var convertor = remember { mutableStateOf(1.0) }
     var oConvertor = remember { mutableStateOf(1.0) }
     val conversionHistory = remember { mutableStateListOf<String>() }
+
+
 
     fun convertUnits() {
         val inputValueAsADouble = inputValue.toDoubleOrNull()?: 0.0
@@ -147,10 +152,18 @@ fun UnitConverter() {
         }
 
         Spacer(modifier = Modifier.height(40.dp))
-
-        OutlinedTextField(value = inputValue, onValueChange = {
-            inputValue = it
-        }, label = { Text("Input Value") }, placeholder = { Text("Ex: 10") })
+        OutlinedTextField(
+            value = inputValue,
+            onValueChange = {
+                // Ensure only digits are accepted
+                inputValue = it.filter { char -> char.isDigit() || char == '.' } // Include decimal points for floating numbers
+            },
+            label = { Text("Input Value") },
+            placeholder = { Text("Ex: 10") },
+            keyboardOptions = KeyboardOptions.Default.copy(
+                keyboardType = KeyboardType.Number // Set keyboard type to number
+            )
+        )
 
         Text("$inputUnit \t\t\tto \t\t\t\t $outputUnit", fontSize = 20.sp)
 
