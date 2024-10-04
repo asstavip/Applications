@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.unitconvertor.ui.theme.UnitConvertorTheme
 
 class MainActivity : ComponentActivity() {
@@ -66,6 +67,8 @@ fun UnitConverter() {
     var oExpanded by remember { mutableStateOf(false) }
     var convertor by remember { mutableStateOf(0.01) }
 
+
+
     Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center, horizontalAlignment = CenterHorizontally) {
         Text("Unit Converter")
 
@@ -75,6 +78,9 @@ fun UnitConverter() {
             inputValue = it
         }, label = { Text("Input Value") }, placeholder = { Text("Ex: 10") })
 
+        Text("$inputUnit \t\t\tto \t\t\t\t $outputUnit", fontSize = 20.sp)
+
+        Spacer(modifier = Modifier.height(10.dp))
         Row (modifier = Modifier.padding(10.dp), horizontalArrangement = Arrangement.spacedBy(50.dp)) {
             Box {
                 Button(onClick = {
@@ -97,7 +103,9 @@ fun UnitConverter() {
                     DropdownMenuItem(
                         text = { Text("Meters") },
                         onClick = {
-                            /**/
+                            iExpanded = !iExpanded
+                            inputUnit = "Meters"
+                            convertor = 1.0
                         }
                     )
                     DropdownMenuItem(
