@@ -56,13 +56,6 @@ import androidx.compose.ui.unit.sp
 import com.example.unitconvertor.ui.theme.UnitConvertorTheme
 import kotlin.math.roundToInt
 
-/*
-TODO 1: remove the user bad request
-
- */
-
-
-
 
 
 
@@ -98,7 +91,7 @@ fun UnitConverter() {
     var convertor = remember { mutableStateOf(1.0) }
     var oConvertor = remember { mutableStateOf(1.0) }
     val conversionHistory = remember { mutableStateListOf<String>() }
-
+    var shareKey by remember { mutableStateOf(false) }
 
 
     fun convertUnits() {
@@ -289,6 +282,7 @@ fun UnitConverter() {
             Button(onClick = {
                 convertUnits()
                 addToHistory(inputValue, outputValue, inputUnit, outputUnit)
+                shareKey = true
             Toast.makeText(context, "Conversion Successful!", Toast.LENGTH_SHORT).show()
         }) {
             Text("Convert")
@@ -298,12 +292,14 @@ fun UnitConverter() {
             Text("Result ≈ ${outputValue} $outputUnit", fontSize = 20.sp)
             Button(
                 onClick = {
+                    if (shareKey){
                     val shareIntent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "Conversion result:from $inputValue $inputUnit to $outputValue $outputUnit ")
+                        putExtra(Intent.EXTRA_TEXT, "Conversion result: $inputValue $inputUnit to ≈ $outputValue $outputUnit")
                     }
                     context.startActivity(Intent.createChooser(shareIntent, "Share result via"))
-                },
+                }
+                    },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Gray
                 )
